@@ -30,12 +30,15 @@ public class Utilisateurs {
 
     private boolean active;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
     private Set<Session> sessions;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
     private Set<Tas_Dechets> tasDechets;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
     private Set<Points> points;
 

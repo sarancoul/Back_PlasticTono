@@ -81,17 +81,25 @@ public class SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'ID : " + sessionId));
 
-        // je verifie si la session est active
+        // Vérifie si la session est active
         if (!session.isActive()) {
-            throw new IllegalStateException("Le dépôt ne peut pas être effectué car la session est expirée, veuillez-vous connectez a nouveau.");
+            throw new IllegalStateException("Le dépôt ne peut pas être effectué car la session est expirée, veuillez-vous connecter à nouveau.");
         }
 
         // Si la session est active, on continue avec l'enregistrement des points
         Points points = pointsService.EnregistrePoint(session, poids);
+
+        // Ajouter les points au total de la session
+        int pointsGagnes = points.getPoints();
+        session.setTotalPoints(session.getTotalPoints() + pointsGagnes);
+
+        // Met à jour le temps de la dernière activité
         session.setLastActivityTime(LocalDateTime.now());
         sessionRepository.save(session);
+
         return points;
     }
+
 
 
     ///////////////::::: methode pour verification du timer //////////////////;;;;;;:::::::::::::///////////
@@ -102,11 +110,9 @@ public class SessionService {
                     .orElseThrow(() -> new RuntimeException("Session non trouvée"));
             if (session.isActive()) {
                 cloturerSession(sessionId); // Termine la session si elle est encore active
-                System.out.println("Session terminée automatiquement après 10 secondes d'inactivité.");
+                System.out.println("Session terminée automatiquement après 1 minutes d'inactivité.");
             }
-        }, LocalDateTime.now().plusSeconds(20).atZone(ZoneId.systemDefault()).toInstant());
+        }, LocalDateTime.now().plusSeconds(50).atZone(ZoneId.systemDefault()).toInstant());
     }
-
-
 
 }

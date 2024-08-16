@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface SessionRepository extends JpaRepository<Session,Long> {
     List<Session> findByUtilisateur(Utilisateurs utilisateur);
+
 }

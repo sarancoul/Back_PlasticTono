@@ -64,10 +64,9 @@ public class SessionController {
 
     //////////////:::::::::::::cloturer une session avec son Id ::::::::::::::::///////////////////////
     @PutMapping("/cloturer/{sessionId}")
-    public  ResponseEntity<String> cloturerSession(@PathVariable Long sessionId){
-        sessionService.cloturerSession(sessionId);
-        return  new ResponseEntity<>("Session cloturée avec succès", HttpStatus.OK);
+    public ResponseEntity<String> cloturerSession(@PathVariable Long sessionId) {
+        Session session = sessionService.cloturerSession(sessionId);  // Récupérer la session après la clôture
+        return new ResponseEntity<>("Session cloturée avec succès. Points cumulés: " + session.getTotalPoints(), HttpStatus.OK);
     }
-
 
 }

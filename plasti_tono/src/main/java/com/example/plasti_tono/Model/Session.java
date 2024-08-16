@@ -21,6 +21,9 @@ public class Session {
 
     private LocalDateTime lastActivityTime;
 
+    private int totalPoints = 0;
+
+
     private boolean isActive;
 
     @ManyToOne
