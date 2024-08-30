@@ -31,6 +31,7 @@ public class SessionController {
     @PostMapping("/start")
     public ResponseEntity<Session> demarrerSession(@RequestBody Utilisateurs utilisateurs){
         Session newSession = sessionService.demarrerSession(utilisateurs);
+
         return new ResponseEntity<>(newSession, HttpStatus.CREATED);
     }
 

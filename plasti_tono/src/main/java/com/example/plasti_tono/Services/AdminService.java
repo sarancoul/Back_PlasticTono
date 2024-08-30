@@ -1,6 +1,6 @@
 package com.example.plasti_tono.Services;
 
-import com.example.plasti_tono.Exception.AdminNonTrouveException;
+
 import com.example.plasti_tono.Model.Admin;
 import com.example.plasti_tono.Model.Utilisateurs;
 import com.example.plasti_tono.Repository.AdminRepository;
@@ -25,19 +25,19 @@ public class AdminService {
     /////////////////////////////login admin////////////////////////////////////
     public Admin loginAdmin(String nom, String motDePasse) {
         return adminRepository.findByNomAndMotDePasse(nom, motDePasse)
-                .orElseThrow(() -> new EntityNotFoundException("Cet utilisateur n'existe pas"));
+                .orElseThrow(() -> new EntityNotFoundException("Cet utilisateur n'existe pas  "));
     }
 ////////////////////desactiver un user/////////////////////////////////
 public void activerUtilisateur(Long idUtilisateur) {
     Utilisateurs utilisateur = utilisateursRepository.findById(idUtilisateur)
-            .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'ID : " + idUtilisateur));
+            .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'Id : " + idUtilisateur));
     utilisateur.setActive(true);
     utilisateursRepository.save(utilisateur);
 }
 
     public void desactiverUtilisateur(Long idUtilisateur) {
         Utilisateurs utilisateur = utilisateursRepository.findById(idUtilisateur)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'ID : " + idUtilisateur));
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'Id : " + idUtilisateur));
         utilisateur.setActive(false);
         utilisateursRepository.save(utilisateur);
     }

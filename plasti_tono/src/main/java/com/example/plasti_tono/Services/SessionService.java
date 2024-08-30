@@ -29,7 +29,6 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
         this.pointsService = pointsService;
     }
-
     ///:::::::::::::::::::/// demarer session apres scanne///////:::::::::::::::::::////////
     public Session demarrerSession(Utilisateurs utilisateurs){
         Session session = new Session();
@@ -42,17 +41,14 @@ public class SessionService {
        tempInactive(session.getIdSession());
         return  session;
     }
-
     ///////::::::::::::::::://////verifier quelle session appartient a quelle utilisateur/////////::::::::::::::::://///////////
     public List<Session> getSessionsByUtilisateur(Utilisateurs utilisateur) {
         return sessionRepository.findByUtilisateur(utilisateur);
     }
-
     /////////::::::::::::::::://///////cloturer une session//////////////:::::::::::::::::::://////////////////////////////:::
-
     public Session cloturerSession(Long sessionId) {
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'ID : " + sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session non trouver avec l'Id correspondant: " + sessionId));
         session.setActive(false);
         session.setDateFin(LocalDateTime.now());
         sessionRepository.save(session);
@@ -62,7 +58,6 @@ public class SessionService {
         }
         return session;
     }
-
     /////////////////////////////:::::prolonger la session si l'utilisateur repond non au front pour prolonger la session::::::::::://////////////
     public Session prolongerSession(Long sessionId) {
         Session session = sessionRepository.findById(sessionId)
@@ -79,11 +74,11 @@ public class SessionService {
 
     public Points deposerDechets(Long sessionId, double poids) {
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'ID : " + sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session non trouvé avec l'Id correspondant: " + sessionId));
 
         // Vérifie si la session est active
         if (!session.isActive()) {
-            throw new IllegalStateException("Le dépôt ne peut pas être effectué car la session est expirée, veuillez-vous connecter à nouveau.");
+            throw new IllegalStateException("Le dépot ne peut être faites car la session est terminé. merci de vous connecter.");
         }
 
         // Si la session est active, on continue avec l'enregistrement des points
@@ -100,8 +95,6 @@ public class SessionService {
         return points;
     }
 
-
-
     ///////////////::::: methode pour verification du timer //////////////////;;;;;;:::::::::::::///////////
     private void tempInactive(Long sessionId) {
         futureTask = taskScheduler.schedule(() -> {
@@ -110,9 +103,8 @@ public class SessionService {
                     .orElseThrow(() -> new RuntimeException("Session non trouvée"));
             if (session.isActive()) {
                 cloturerSession(sessionId); // Termine la session si elle est encore active
-                System.out.println("Session terminée automatiquement après 1 minutes d'inactivité.");
+                System.out.println("Session terminée automatiquement après 1 minutes d'inactivité");
             }
-        }, LocalDateTime.now().plusSeconds(50).atZone(ZoneId.systemDefault()).toInstant());
+        }, LocalDateTime.now().plusSeconds(20).atZone(ZoneId.systemDefault()).toInstant());
     }
-
 }

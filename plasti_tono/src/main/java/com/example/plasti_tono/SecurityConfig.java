@@ -15,13 +15,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Désactiver CSRF
+                .csrf(csrf -> csrf.disable()) // Désactiver CSRF pour les WebSockets
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").permitAll()
-                        .requestMatchers("/session/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/ws/**").permitAll() // Autorise les connexions WebSocket
+                        .requestMatchers("/mqtt/**").permitAll() // Autorise les connexions MQTT
+                        .requestMatchers("/session/**").permitAll() // Autorise l'accès aux sessions
+                        .requestMatchers("/user/**").permitAll() // Autorise l'accès public à /user/**
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Requiert le rôle ADMIN pour /admin/**
+                        .anyRequest().authenticated() // Authentification requise pour toutes les autres requêtes
                 );
         return http.build();
     }
