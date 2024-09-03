@@ -1,26 +1,31 @@
 package com.example.plasti_tono.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 
+import java.util.Map;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Utilisateurs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idUtilisateur;
 
-    @NotBlank
+
     @Size(min = 2, max = 80, message = "Nombre de caractère invalide")
     private String nom;
 
-    @NotBlank
+
     @Size(min = 2, max = 80, message = "Nombre de caractère invalide")
     private String prenom;
 
@@ -28,7 +33,11 @@ public class Utilisateurs {
     @Size(min = 8, max = 12, message = "Nombre de caractère de chiffre invalid")
     private String numTel;
 
+    private String firebaseUid;
+
+    private String email;
     private boolean active;
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
@@ -54,5 +63,13 @@ public class Utilisateurs {
             inverseJoinColumns = @JoinColumn(name = "idNotification"))
     private Set<Notification> notifications;
 
+    public Utilisateurs(Map<String,Object> map){
+        System.out.println("------------------------"+map);
+        this.nom=map.get("name").toString();
+        this.numTel=map.get("phone").toString();
+        this.firebaseUid=map.get("userId").toString();
+        this.email=map.get("email").toString();
+
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.example.plasti_tono.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,12 +19,15 @@ public class Kiosque {
 
     private String etat;
 
+    private String code;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "kiosque")
     private Set<Tas_Dechets> tasDechets;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "kiosque")
     private Set<Alarme> alarme;
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "idAdmin")
     private Admin admin;

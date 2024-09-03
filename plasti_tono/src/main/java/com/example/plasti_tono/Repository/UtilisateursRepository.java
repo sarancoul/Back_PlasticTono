@@ -10,4 +10,6 @@ public interface UtilisateursRepository extends JpaRepository<Utilisateurs, Long
     public Utilisateurs findByNumTel(String numTel);
     public Utilisateurs findByNomAndPrenomAndNumTel(String nom, String prenom, String numTel);
 
+    public Utilisateurs findByFirebaseUid(String firebaseUid);
+
 }

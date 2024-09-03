@@ -12,12 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-@RestController
 @AllArgsConstructor
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
+    @Autowired
     private final AdminService adminService;
 
     /////////////////////////login admin////////////////////////////////////

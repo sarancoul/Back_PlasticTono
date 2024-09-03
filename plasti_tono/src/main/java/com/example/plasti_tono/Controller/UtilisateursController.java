@@ -1,9 +1,11 @@
 package com.example.plasti_tono.Controller;
 
 import com.example.plasti_tono.Exception.UtilisateurNonTrouveException;
+import com.example.plasti_tono.FireConfig.FirestoreService;
 import com.example.plasti_tono.Model.Utilisateurs;
 import com.example.plasti_tono.Services.UtilisateursService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +14,17 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/user")
 public class UtilisateursController {
+
     private final UtilisateursService utilisateursService;
+
+
+    @Autowired
+    public UtilisateursController(UtilisateursService utilisateursService) {
+        this.utilisateursService = utilisateursService;
+
+    }
 
     @GetMapping("/read")
     public ResponseEntity<List<Utilisateurs>> getAllUtilisateurs() {
@@ -66,6 +75,10 @@ public class UtilisateursController {
         Utilisateurs utilisateur = utilisateursService.connectionUtilisateur(nom, prenom, numTel);
         return new ResponseEntity<>(utilisateur, HttpStatus.OK);
     }
+
+
+
+
 }
 
 

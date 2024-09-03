@@ -27,6 +27,10 @@ public class Session {
     private boolean isActive;
 
     @ManyToOne
+    @JoinColumn(name = "id_kiosque")
+    private Kiosque kiosque;
+
+    @ManyToOne
     @JoinColumn(name = "id_utilisateur")
     private Utilisateurs utilisateur;
 

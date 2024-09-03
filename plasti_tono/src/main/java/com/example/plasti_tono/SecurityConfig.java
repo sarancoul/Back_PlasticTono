@@ -22,7 +22,9 @@ public class SecurityConfig {
                         .requestMatchers("/session/**").permitAll() // Autorise l'accès aux sessions
                         .requestMatchers("/user/**").permitAll() // Autorise l'accès public à /user/**
                         .requestMatchers("/admin/**").hasRole("ADMIN") // Requiert le rôle ADMIN pour /admin/**
-                        .anyRequest().authenticated() // Authentification requise pour toutes les autres requêtes
+                        .requestMatchers("/kiosque/**").permitAll()
+                        .requestMatchers("/firebase/**").permitAll()
+                        .anyRequest().permitAll()// Authentification requise pour toutes les autres requêtes
                 );
         return http.build();
     }
