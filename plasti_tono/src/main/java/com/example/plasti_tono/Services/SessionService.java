@@ -49,7 +49,7 @@ public class SessionService {
 
     }
     ///:::::::::::::::::::/// demarer session apres scanne///////:::::::::::::::::::////////
-    public Session demarrerSession(Utilisateurs utilisateurs, String kioskCode) {
+    public Session demarrerSession(Utilisateurs utilisateurs, String kioskCode, int poids) {
         Kiosque kiosque = kiosqueRepository.findByCode(kioskCode)
                 .orElseThrow(() -> new EntityNotFoundException("Kiosque non trouvé avec le code: " + kioskCode));
 
@@ -62,20 +62,31 @@ public class SessionService {
         session.setKiosque(kiosque);
         session.setActive(true);
         session.setDatedebut(LocalDateTime.now());
+        session.setPoids((long) poids);
+        System.out.println("Tentative de sauvegarde dans phpmyadmin");
         session = sessionRepository.save(session);
+        System.out.println("Enregistré avec succes avc id dans php admin: " + session.getIdSession());
+        System.out.println("Poids lors de la création de la session: " + session.getPoids());
 
         //Enregistrer la session dans firebase
         Map<String, Object> sessionData = new HashMap<>();
+        sessionData.put("session_id",session.getIdSession());
         sessionData.put("userId", utilisateurs.getIdUtilisateur());
         sessionData.put("kioskCode", kioskCode);
         sessionData.put("active", true);
-        sessionData.put("startTime", session.getDatedebut());
+        sessionData.put("startTime", session.getDatedebut().toString());
+        sessionData.put("poids", poids);
 
         // Ici, on enregistre dans Firestore
-        firestoreService.saveSessionData(Long.valueOf(String.valueOf(session.getIdSession())), sessionData);
+        firestoreService.saveSessionData(session.getIdSession() +"-"+kioskCode, sessionData);
 
         // Démarrer un timer pour la fermeture automatique de la session après 10 secondes
         tempInactive(session.getIdSession());
+
+        // Renvoyer l'ID de session et d'autres informations si nécessaire
+        Map<String, Object> response = new HashMap<>();
+        response.put("sessionId", session.getIdSession());  // Assurez-vous que l'ID de session est renvoyé ici
+        response.put("message", "Session démarrée avec succès");
         return session;
     }
 
@@ -84,18 +95,65 @@ public class SessionService {
         return sessionRepository.findByUtilisateur(utilisateur);
     }
     /////////::::::::::::::::://///////cloturer une session//////////////:::::::::::::::::::://////////////////////////////:::
-    public Session cloturerSession(Long sessionId) {
+
+   public Session cloturerSession(Long sessionId) {
+        // Récupérer la session depuis la base de données
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session non trouver avec l'Id correspondant: " + sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'Id correspondant: " + sessionId));
+        System.out.println("-------------------------sessionId::::"+sessionId);
+
+
+       /*int currentPoids = session.getPoids();
+       System.out.println("Poids actuel récupéré: " + currentPoids);*/
+
+        // Mettre à jour l'état de la session
         session.setActive(false);
         session.setDateFin(LocalDateTime.now());
-        sessionRepository.save(session);
-        //// si la session se termine manuellement, annuler le timer
-        if (futureTask != null && !futureTask.isCancelled()){
+       // session.setPoids(50);
+
+       // Mettre à jour la session dans Firestore
+        Map<String, Object> sessionUpdate = new HashMap<>();
+        sessionUpdate.put("active", false);
+        sessionUpdate.put("session_id",session.getIdSession());
+        sessionUpdate.put("startTime", session.getDatedebut().toString());
+        sessionUpdate.put("endTime", session.getDateFin().toString());
+       session = sessionRepository.save(session);
+
+       //firestoreService.deleteSessionData(session.getIdSession() + "-" + session.getKiosque().getCode());   /////////supriimmmmmmmmmerrrrrrrrr
+
+
+       String sessionUId=sessionId+"-"+session.getKiosque().getCode();
+
+       //get firebase session
+       Map<String,Object> res=firestoreService.getSessionData(sessionUId);
+       System.out.println("-------session recupere chez firebase::::"+res);
+
+       System.out.println("-------poid recupere chez firebase::::"+res.get("poids"));
+
+       Long poid=   (Long) res.get("poids");
+
+       System.out.println("-------poid22 recupere chez firebase::::"+(Long) res.get("poids"));
+
+       session.setPoids(poid);
+       sessionUpdate.put("poids", session.getPoids());
+       sessionRepository.save(session);
+
+       try {
+            firestoreService.updateSessionData(sessionUId, sessionUpdate);
+            System.out.println("Mise à jour de Firestore réussie.");
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour de Firestore: " + e.getMessage());
+            // Vous pouvez aussi lancer une exception ou enregistrer cette erreur dans un journal
+        }
+
+        // Annuler le timer si la session est terminée manuellement
+        if (futureTask != null && !futureTask.isCancelled()) {
             futureTask.cancel(true);
+            System.out.println("Timer annulé.");
         }
         return session;
     }
+
     /////////////////////////////:::::prolonger la session si l'utilisateur repond non au front pour prolonger la session::::::::::://////////////
     public Session prolongerSession(Long sessionId) {
         Session session = sessionRepository.findById(sessionId)
@@ -110,7 +168,7 @@ public class SessionService {
     }
     //////////:::::::::::depots dechets::::::::::::://///////////////////////////////
 
-    public Points deposerDechets(Long sessionId, double poids) {
+   /* public Points deposerDechets(Long sessionId, double poids) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Session non trouvé avec l'Id correspondant: " + sessionId));
 
@@ -132,7 +190,7 @@ public class SessionService {
 
         return points;
     }
-
+*/
     ///////////////::::: methode pour verification du timer //////////////////;;;;;;:::::::::::::///////////
     private void tempInactive(Long sessionId) {
         futureTask = taskScheduler.schedule(() -> {
@@ -145,4 +203,6 @@ public class SessionService {
             }
         }, LocalDateTime.now().plusSeconds(60).atZone(ZoneId.systemDefault()).toInstant());
     }
+
+
 }

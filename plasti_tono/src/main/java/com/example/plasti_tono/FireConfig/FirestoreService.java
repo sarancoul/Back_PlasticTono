@@ -39,18 +39,28 @@ public class FirestoreService {
         }
     }
 
-   /* public void saveSessionData(Long sessionId, Map<String, Object> sessionData) {
-        DocumentReference docRef = firestore.collection("Sessions").document(String.valueOf(sessionId));
-        ApiFuture<WriteResult> result = docRef.set(sessionData);
+    public Map<String, Object> getSessionData(String sessionId) {
         try {
-            result.get();
-            System.out.println("Session sauvegardée avec succès dans Firestore");
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la sauvegarde de la session: " + e.getMessage());
+            ApiFuture<DocumentSnapshot> future = firestore.collection("Sessions").document(sessionId).get();
+            DocumentSnapshot document = future.get();
+
+            if (document.exists()){
+                System.out.println("Données de sessions : " + document.getData());
+                return document.getData();
+
+            }else {
+                System.out.println("Pas de document trouvé !");
+                return null;
+
+            }
+        } catch (InterruptedException | ExecutionException e){
+            e.printStackTrace();
+            return null;
         }
-    }*/
-   public void saveSessionData(Long sessionId, Map<String, Object> sessionData) {
-       DocumentReference docRef = firestore.collection("Sessions").document(String.valueOf(sessionId));
+    }
+
+   public void saveSessionData(String sessionId, Map<String, Object> sessionData) {
+       DocumentReference docRef = firestore.collection("Sessions").document(sessionId);
        ApiFuture<WriteResult> result = docRef.set(sessionData);
        try {
            WriteResult writeResult = result.get();
@@ -59,5 +69,49 @@ public class FirestoreService {
            System.err.println("Erreur lors de la sauvegarde de la session: " + e.getMessage());
        }
    }
+
+    public void deleteSessionData(String sessionId) {
+        DocumentReference docRef = firestore.collection("Sessions").document(sessionId);
+        ApiFuture<WriteResult> result = docRef.delete();  // Utiliser delete() pour supprimer le document
+        try {
+            WriteResult writeResult = result.get();
+            System.out.println("Session supprimée avec succès à " + writeResult.getUpdateTime());
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la suppression de la session : " + e.getMessage());
+        }
+    }
+
+
+    ////////fin session
+    public void updateSessionData(String sessionId, Map<String, Object> sessionData) {
+        DocumentReference docRef = firestore.collection("Sessions").document(String.valueOf(sessionId));
+        ApiFuture<WriteResult> result = docRef.set(sessionData);
+
+        try {
+            // Attendre que l'opération se termine et vérifier le résultat
+            WriteResult writeResult = result.get();
+            System.out.println("Session mise à jour avec succès dans Firestore à " + writeResult.getUpdateTime());
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour de la session: " + e.getMessage());
+            throw new RuntimeException("Erreur lors de la mise à jour de Firestore", e);
+        }
+    }
+
+
+
+
+
+
+   /* public void deleteSessionData(Long sessionId) {
+        // Supprimer le document de la collection "Sessions" dans Firestore
+        ApiFuture<WriteResult> result = firestore.collection("Sessions").document(String.valueOf(sessionId)).delete();
+
+        try {
+            WriteResult writeResult = result.get();
+            System.out.println("Session supprimée avec succès à " + writeResult.getUpdateTime());
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la suppression de la session : " + e.getMessage());
+        }
+    }*/
 }
 

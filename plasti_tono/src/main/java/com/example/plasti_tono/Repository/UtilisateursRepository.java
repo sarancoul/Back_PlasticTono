@@ -4,12 +4,14 @@ import com.example.plasti_tono.Model.Utilisateurs;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 public interface UtilisateursRepository extends JpaRepository<Utilisateurs, Long> {
     public Utilisateurs findByNomAndPrenom(String nom, String prenom);  // Correction ici
     public Utilisateurs findByNumTel(String numTel);
     public Utilisateurs findByNomAndPrenomAndNumTel(String nom, String prenom, String numTel);
 
-    public Utilisateurs findByFirebaseUid(String firebaseUid);
+    public Optional<Utilisateurs> findByFirebaseUid(String firebaseUid);
 
 }

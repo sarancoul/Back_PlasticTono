@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UtilisateursService {
@@ -24,7 +25,9 @@ public class UtilisateursService {
         return utilisateursRepository.findAll();
     }
 //////////////////////////////////// Affichage d'un utilisateur//////////////////////////////
-
+    public Optional<Utilisateurs> fetchUtilisateursByFirebaseUUID(String firebaseUUID){
+        return utilisateursRepository.findByFirebaseUid(firebaseUUID);
+    }
     public Utilisateurs getUtilisateurById(Long id) {
         return utilisateursRepository.findById(id)
                 .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé avec l'ID : " + id));
