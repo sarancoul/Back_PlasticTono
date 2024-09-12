@@ -6,7 +6,7 @@ public class HistoriqueDepotDTO {
         private LocalDateTime dateDepot;
         private String codeKiosque;
         private Long poids;
-        private int points;
+        private double points;
 
         public LocalDateTime getDateDepot() {
                 return dateDepot;
@@ -32,11 +32,11 @@ public class HistoriqueDepotDTO {
                 this.poids = poids;
         }
 
-        public int getPoints() {
+        public double getPoints() {
                 return points;
         }
 
-        public void setPoints(int points) {
+        public void setPoints(double points) {
                 this.points = points;
         }
 }

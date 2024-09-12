@@ -15,7 +15,7 @@ public class Points {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int points;
+    private double points;
     private double poids;
 
     @JsonIgnore

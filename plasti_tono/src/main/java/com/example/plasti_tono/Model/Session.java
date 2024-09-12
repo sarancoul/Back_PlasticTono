@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+
 import java.time.OffsetDateTime;
+
 import java.util.Set;
 
 @Entity
@@ -22,8 +24,6 @@ public class Session {
     private LocalDateTime lastActivityTime;
     private Long poids;
     private String firebase_uid;
-
-   // private int totalPoints = 0;
 
     private boolean isActive;
 

@@ -23,7 +23,7 @@ public class PointsService {
 
     public Points EnregistrePoint(Session session, double poids){
 
-        int points = calculerPoints(poids);
+        Double points = calculerPoints(poids);
         Points nouveauPoints = new Points();
         nouveauPoints.setPoids(poids);
         nouveauPoints.setPoints(points);
@@ -31,8 +31,18 @@ public class PointsService {
 
         return pointsRepository.save(nouveauPoints);
     }
+    private Double calculerPoints(double poids) {
 
-    private int calculerPoints(double poids){
+        double points = poids / 65;
+
+        return  points;
+    }
+
+
+    /*private int calculerPoints(double poids) {
+
+
+
         if (poids >= 100) {
             return 200; // 100 kg ou plus donne 200 points
         } else if (poids >= 75) {
@@ -50,9 +60,9 @@ public class PointsService {
         } else {
             return 0; // Moins de 1 kg ne donne pas de points
         }
-    }
+    }*/
 
-    ////////////////recevoir points de user connecté///////////////////////////////
+        ////////////////recevoir points de user connecté///////////////////////////////
     /* public  int calculerTotalPointsUtilisateur(Long idUtilisateur){
         List<Session> sessions = sessionRepository.findByUtilisateur_IdUtilisateur(idUtilisateur);
         int totalPoints = 0;
@@ -63,4 +73,4 @@ public class PointsService {
         return totalPoints;
      }*/
 
-}
+    }

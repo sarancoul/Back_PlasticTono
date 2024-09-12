@@ -24,6 +24,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN") // Requiert le rôle ADMIN pour /admin/**
                         .requestMatchers("/kiosque/**").permitAll()
                         .requestMatchers("/firebase/**").permitAll()
+                        .requestMatchers("/Suggestions/**").permitAll()
                         .anyRequest().permitAll()// Authentification requise pour toutes les autres requêtes
                 );
         return http.build();

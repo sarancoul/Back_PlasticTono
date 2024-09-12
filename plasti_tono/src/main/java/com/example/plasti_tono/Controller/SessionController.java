@@ -119,7 +119,7 @@ public class SessionController {
     }
 
     ////////////////£££££££££££££££  points µµµµµµµ%%%%%%%%%%%%%%%
-    @PostMapping("/enregistrerPoints/{sessionId}/")
+    @PostMapping("/enregistrerPoints/{sessionId}")
     public ResponseEntity<Points> enregistrerPoints(@PathVariable Long sessionId, @RequestParam int poids) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session non trouvée avec l'ID: " + sessionId));
@@ -129,12 +129,12 @@ public class SessionController {
     }
     /////////////points recevable pour flutter£££££µµµµµµµµµµµµµµµµµ**************///////////////
     @GetMapping("/{sessionId}/points")
-    public ResponseEntity<Points> getPointsBySession(@PathVariable Long sessionId) {
+    public ResponseEntity<Double> getPointsBySession(@PathVariable Long sessionId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session non trouvée avec l'ID: " + sessionId));
 
         Points points = pointsService.EnregistrePoint(session, session.getPoids());
-        return ResponseEntity.ok(points);
+        return ResponseEntity.ok(points.getPoints());
     }
     /////////////////historique ///////////////////////////////////////////////////////////////////////////////////////////////
     @GetMapping("/historique/{id}")
