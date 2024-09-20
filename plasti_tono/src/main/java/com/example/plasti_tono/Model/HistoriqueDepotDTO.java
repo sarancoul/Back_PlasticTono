@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class HistoriqueDepotDTO {
         private LocalDateTime dateDepot;
         private String codeKiosque;
-        private Long poids;
+        private Double poids;
         private double points;
 
         public LocalDateTime getDateDepot() {
@@ -24,11 +24,11 @@ public class HistoriqueDepotDTO {
                 this.codeKiosque = codeKiosque;
         }
 
-        public Long getPoids() {
+        public Double getPoids() {
                 return poids;
         }
 
-        public void setPoids(Long poids) {
+        public void setPoids(Double poids) {
                 this.poids = poids;
         }
 

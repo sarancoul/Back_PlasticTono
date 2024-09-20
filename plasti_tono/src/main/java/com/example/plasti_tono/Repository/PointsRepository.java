@@ -8,5 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface PointsRepository extends JpaRepository<Points, Long>{
    // Points findBySession(long session);
 
+    Points findFirstBySessionIdSession(long id);
+
     Points findFirstBySession(Session session);
 }

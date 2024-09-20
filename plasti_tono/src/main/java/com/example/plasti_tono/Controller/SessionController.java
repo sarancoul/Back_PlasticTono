@@ -6,6 +6,7 @@ import com.example.plasti_tono.Model.*;
 import com.example.plasti_tono.Repository.PointsRepository;
 import com.example.plasti_tono.Repository.SessionRepository;
 import com.example.plasti_tono.Repository.UtilisateursRepository;
+import com.example.plasti_tono.Services.PointTotalService;
 import com.example.plasti_tono.Services.PointsService;
 import com.example.plasti_tono.Services.SessionService;
 import com.example.plasti_tono.Services.UtilisateursService;
@@ -34,9 +35,10 @@ public class SessionController {
     private PointsRepository pointsRepository;
     FirestoreService firestoreService;
 
+    PointTotalService pointTotalService;
 
     @Autowired
-    public SessionController(SessionService sessionService, UtilisateursService utilisateursService, UtilisateursRepository utilisateursRepository, FirebaseService firebaseService,FirestoreService firestoreService, SessionRepository sessionRepository, PointsService pointsService, PointsRepository pointsRepository) {
+    public SessionController(SessionService sessionService, UtilisateursService utilisateursService, PointTotalService pointTotalService, UtilisateursRepository utilisateursRepository, FirebaseService firebaseService,FirestoreService firestoreService, SessionRepository sessionRepository, PointsService pointsService, PointsRepository pointsRepository) {
         this.sessionService = sessionService;
         this.utilisateursService = utilisateursService;
         this.utilisateursRepositry = utilisateursRepository;
@@ -45,13 +47,14 @@ public class SessionController {
         this.sessionRepository = sessionRepository;
         this.pointsService = pointsService;
         this.pointsRepository = pointsRepository;
+        this.pointTotalService=pointTotalService;
     }
     ///////////##############demarer une session################///////////////
     @PostMapping("/start")
     public ResponseEntity<Session> demarrerSession(
             HttpServletRequest request,
             @RequestParam String kioskCode,
-            @RequestParam(defaultValue = "0") int poids) {
+            @RequestParam(defaultValue = "0") Double poids) {
         try {
             String token = request.getHeader("Authorization");
 
@@ -109,7 +112,7 @@ public class SessionController {
     }
     //////////££££££££££recevoir poids  //////////££££££££££££££
     @GetMapping("/getPoids/{sessionId}")
-    public ResponseEntity<Long> getPoidsSession(@PathVariable Long sessionId) {
+    public ResponseEntity<Double> getPoidsSession(@PathVariable Long sessionId) {
         // Récupérer la session dans la base de données
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'ID: " + sessionId));
@@ -125,6 +128,10 @@ public class SessionController {
                 .orElseThrow(() -> new RuntimeException("Session non trouvée avec l'ID: " + sessionId));
         Points points = pointsService.EnregistrePoint(session, poids);
 
+        System.out.println("-------------------------------------SAVEPOINT");
+        System.out.println(points);
+
+        //get point and update total
         return ResponseEntity.ok(points);
     }
     /////////////points recevable pour flutter£££££µµµµµµµµµµµµµµµµµ**************///////////////
@@ -133,8 +140,16 @@ public class SessionController {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session non trouvée avec l'ID: " + sessionId));
 
-        Points points = pointsService.EnregistrePoint(session, session.getPoids());
-        return ResponseEntity.ok(points.getPoints());
+        pointsService.EnregistrePoint(session, session.getPoids());
+
+        Points p2=pointsService.getByIdSession(sessionId);
+
+        pointTotalService.saveOrUpdatePoint(session.getUtilisateur(),p2.getPoints());
+
+        System.out.println("--------------------------------------------{}:::::::p*2"+p2);
+        System.out.println("--------------------------------------------{}:::::::session"+p2);
+
+        return ResponseEntity.ok(p2.getPoints());
     }
     /////////////////historique ///////////////////////////////////////////////////////////////////////////////////////////////
     @GetMapping("/historique/{id}")

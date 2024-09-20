@@ -15,6 +15,8 @@ public class PointsService {
     private  final PointsRepository pointsRepository;
     private SessionRepository sessionRepository;
 
+    private final double conversionRate = 10.0;
+
     @Autowired
     public PointsService(PointsRepository pointsRepository, SessionRepository sessionRepository) {
         this.pointsRepository = pointsRepository;
@@ -31,11 +33,20 @@ public class PointsService {
 
         return pointsRepository.save(nouveauPoints);
     }
-    private Double calculerPoints(double poids) {
+    public Double calculerPoints(double poids) {
 
         double points = poids / 65;
 
         return  points;
+    }
+
+    public  Points getByIdSession(Long id){
+        return pointsRepository.findFirstBySessionIdSession(id);
+    }
+
+
+    public Double convertirPointsEnArgent(Double points) {
+        return points * conversionRate;
     }
 
 

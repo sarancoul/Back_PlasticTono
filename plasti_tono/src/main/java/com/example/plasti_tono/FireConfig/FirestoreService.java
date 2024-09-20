@@ -15,9 +15,11 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class FirestoreService {
 
-    @Autowired
     Firestore firestore;
 
+    public FirestoreService(Firestore firestore) {
+        this.firestore = firestore;
+    }
 
     public Map<String, Object> getUserData(String userId) {
         try {
@@ -39,9 +41,11 @@ public class FirestoreService {
         }
     }
 
-    public Map<String, Object> getSessionData(String sessionId) {
+    public Map<String, Object> getSessionData(String sessionUid) {
+        System.out.println("uid session:::: : " +sessionUid);
+
         try {
-            ApiFuture<DocumentSnapshot> future = firestore.collection("Sessions").document(sessionId).get();
+            ApiFuture<DocumentSnapshot> future = firestore.collection("Sessions").document(sessionUid).get();
             DocumentSnapshot document = future.get();
 
             if (document.exists()){

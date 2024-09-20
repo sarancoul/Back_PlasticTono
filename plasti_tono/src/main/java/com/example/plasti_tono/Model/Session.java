@@ -18,15 +18,11 @@ public class Session {
     private long idSession;
 
    private LocalDateTime datedebut = LocalDateTime.now();
-
     private LocalDateTime dateFin;
-
     private LocalDateTime lastActivityTime;
-    private Long poids;
+    private double poids;
     private String firebase_uid;
-
     private boolean isActive;
-
     @ManyToOne
     @JoinColumn(name = "id_kiosque")
     private Kiosque kiosque;

@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers("/kiosque/**").permitAll()
                         .requestMatchers("/firebase/**").permitAll()
                         .requestMatchers("/Suggestions/**").permitAll()
+                        .requestMatchers("/points/**").permitAll()
                         .anyRequest().permitAll()// Authentification requise pour toutes les autres requêtes
                 );
         return http.build();

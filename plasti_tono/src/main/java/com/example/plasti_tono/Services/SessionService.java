@@ -6,9 +6,7 @@ import com.example.plasti_tono.Model.Kiosque;
 import com.example.plasti_tono.Model.Points;
 import com.example.plasti_tono.Model.Session;
 import com.example.plasti_tono.Model.Utilisateurs;
-import com.example.plasti_tono.Repository.KiosqueRepository;
-import com.example.plasti_tono.Repository.SessionRepository;
-import com.example.plasti_tono.Repository.UtilisateursRepository;
+import com.example.plasti_tono.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -29,7 +27,7 @@ public class SessionService {
     private TaskScheduler taskScheduler = new ConcurrentTaskScheduler();
     private ScheduledFuture<?> futureTask;
 
-    private PointsService pointsService;
+    private PointsRepository pointsRepository;
 
     private UtilisateursRepository utilisateursRepository;
 
@@ -37,19 +35,20 @@ public class SessionService {
 
     private FirestoreService firestoreService;
 
+    private PointTotalService pointTotalService;
+
     @Autowired
-    public SessionService(SessionRepository sessionRepository, PointsService pointsService, KiosqueRepository kiosqueRepository, UtilisateursRepository utilisateursRepository,FirestoreService firestoreService ) {
+    public SessionService(SessionRepository sessionRepository, PointsRepository pointsRepository, KiosqueRepository kiosqueRepository, UtilisateursRepository utilisateursRepository, FirestoreService firestoreService, PointTotalService pointTotalService) {
         this.sessionRepository = sessionRepository;
-        this.pointsService = pointsService;
         this.kiosqueRepository = kiosqueRepository;
         this.utilisateursRepository = utilisateursRepository;
         this.firestoreService = firestoreService;
-
-
+        this.pointsRepository=pointsRepository;
+        this.pointTotalService=pointTotalService;
 
     }
     ///:::::::::::::::::::/// demarer session apres scanne///////:::::::::::::::::::////////
-    public Session demarrerSession(Utilisateurs utilisateurs, String kioskCode, int poids) {
+    public Session demarrerSession(Utilisateurs utilisateurs, String kioskCode, Double poids) {
         Kiosque kiosque = kiosqueRepository.findByCode(kioskCode)
                 .orElseThrow(() -> new EntityNotFoundException("Kiosque non trouvé avec le code: " + kioskCode));
 
@@ -62,7 +61,7 @@ public class SessionService {
         session.setKiosque(kiosque);
         session.setActive(true);
         session.setDatedebut(LocalDateTime.now());
-        session.setPoids((long) poids);
+        session.setPoids((Double) poids);
         System.out.println("Tentative de sauvegarde dans phpmyadmin");
         session = sessionRepository.save(session);
         System.out.println("Enregistré avec succes avc id dans php admin: " + session.getIdSession());
@@ -94,13 +93,23 @@ public class SessionService {
     public List<Session> getSessionsByUtilisateur(Utilisateurs utilisateur) {
         return sessionRepository.findByUtilisateur(utilisateur);
     }
+
     /////////::::::::::::::::://///////cloturer une session//////////////:::::::::::::::::::://////////////////////////////:::
 
    public Session cloturerSession(Long sessionId) {
         // Récupérer la session depuis la base de données
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'Id correspondant: " + sessionId));
-        System.out.println("-------------------------sessionId::::"+sessionId);
+        Session session = sessionRepository.findFirstByIdSession(sessionId);
+        if (session==null) {
+            System.out.println("-------------------------SESSION::::" + null);
+
+            throw new EntityNotFoundException("Session non trouvée avec l'Id correspondant: " + sessionId);
+            //.orElseThrow(() -> new EntityNotFoundException("Session non trouvée avec l'Id correspondant: " + sessionId));
+        }
+       System.out.println("-------------------------SESSION::::" + session);
+       System.out.println("-------------------------sessionId::::"+sessionId);
+       System.out.println("-------------------------SESSION::::" + session.getIdSession());
+       System.out.println("-------------------------SESSION::::" + session.getPoids());
+       System.out.println("-------------------------SESSION::::" + session.getKiosque().getCode());
 
 
        /*int currentPoids = session.getPoids();
@@ -117,12 +126,17 @@ public class SessionService {
         sessionUpdate.put("session_id",session.getIdSession());
         sessionUpdate.put("startTime", session.getDatedebut().toString());
         sessionUpdate.put("endTime", session.getDateFin().toString());
-       session = sessionRepository.save(session);
 
        //firestoreService.deleteSessionData(session.getIdSession() + "-" + session.getKiosque().getCode());   /////////supriimmmmmmmmmerrrrrrrrr
 
 
        String sessionUId=sessionId+"-"+session.getKiosque().getCode();
+
+       session.setFirebase_uid(sessionUId);
+       session = sessionRepository.save(session);
+
+       System.out.println("-------------------------SESSIONuid::::" + sessionUId);
+       System.out.println("-------------------------SESSIONuid from object::::" + session.getFirebase_uid());
 
        //get firebase session
        Map<String,Object> res=firestoreService.getSessionData(sessionUId);
@@ -130,13 +144,19 @@ public class SessionService {
 
        System.out.println("-------poid recupere chez firebase::::"+res.get("poids"));
 
-       Long poid=   (Long) res.get("poids");
+       Double poid=  asDouble(res.get("poids"));
 
-       System.out.println("-------poid22 recupere chez firebase::::"+(Long) res.get("poids"));
+       System.out.println("-------poid22 recupere chez firebase::::"+ res.get("poids"));
 
        session.setPoids(poid);
        sessionUpdate.put("poids", session.getPoids());
-       sessionRepository.save(session);
+       Session session1= sessionRepository.save(session);
+
+       System.out.println(session);
+
+       System.out.println(session1);
+
+
 
        try {
             firestoreService.updateSessionData(sessionUId, sessionUpdate);
@@ -202,6 +222,14 @@ public class SessionService {
                 System.out.println("Session terminée automatiquement après 1 minutes d'inactivité");
             }
         }, LocalDateTime.now().plusSeconds(60).atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    Double asDouble(Object o) {
+        Double val = null;
+        if (o instanceof Number) {
+            val = ((Number) o).doubleValue();
+        }
+        return val;
     }
 
 
