@@ -43,6 +43,7 @@ public class Utilisateurs {
     @OneToMany(mappedBy = "utilisateur")
     private Set<Session> sessions;
 
+
     @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
     private Set<Tas_Dechets> tasDechets;

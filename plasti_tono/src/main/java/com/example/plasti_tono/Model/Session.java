@@ -32,7 +32,7 @@ public class Session {
     private Utilisateurs utilisateur;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "session" ,fetch = FetchType.EAGER)
     private Set<Points> points;
 
 }

@@ -1,9 +1,6 @@
 package com.example.plasti_tono.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -18,12 +15,19 @@ public class Notification {
     private long idNotification;
 
     @NotBlank
-    @Size(min =2, max = 80, message = "Ecrivez un titre court")
+    @Size(min = 2, max = 200, message = "Ecrivez un titre compréhensif")
     private String titre;
 
     @NotBlank
     private String message;
 
-    private LocalDateTime dateNotification = LocalDateTime.now();
+    @NotBlank
+    private String type;
 
+
+    @ManyToOne
+    @JoinColumn(name = "idUtilisateur")
+    private Utilisateurs utilisateur;
+
+    private LocalDateTime dateNotification = LocalDateTime.now();
 }

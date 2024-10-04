@@ -8,6 +8,7 @@ import com.example.plasti_tono.Model.Session;
 import com.example.plasti_tono.Model.Utilisateurs;
 import com.example.plasti_tono.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -118,7 +119,7 @@ public class SessionService {
         // Mettre à jour l'état de la session
         session.setActive(false);
         session.setDateFin(LocalDateTime.now());
-       // session.setPoids(50);
+        session.setPoids(50.5);
 
        // Mettre à jour la session dans Firestore
         Map<String, Object> sessionUpdate = new HashMap<>();
@@ -155,8 +156,6 @@ public class SessionService {
        System.out.println(session);
 
        System.out.println(session1);
-
-
 
        try {
             firestoreService.updateSessionData(sessionUId, sessionUpdate);
@@ -214,14 +213,14 @@ public class SessionService {
     ///////////////::::: methode pour verification du timer //////////////////;;;;;;:::::::::::::///////////
     private void tempInactive(Long sessionId) {
         futureTask = taskScheduler.schedule(() -> {
-            // Vérifie si la session est toujours active après 10 secondes
+
             Session session = sessionRepository.findById(sessionId)
                     .orElseThrow(() -> new RuntimeException("Session non trouvée"));
             if (session.isActive()) {
                 cloturerSession(sessionId); // Termine la session si elle est encore active
                 System.out.println("Session terminée automatiquement après 1 minutes d'inactivité");
             }
-        }, LocalDateTime.now().plusSeconds(60).atZone(ZoneId.systemDefault()).toInstant());
+        }, LocalDateTime.now().plusSeconds(240).atZone(ZoneId.systemDefault()).toInstant());
     }
 
     Double asDouble(Object o) {
@@ -232,5 +231,13 @@ public class SessionService {
         return val;
     }
 
+    // Méthode pour obtenir la somme des poids aujourd'hui
+    public double getTotalWeightToday() {
+        return sessionRepository.sumWeightsToday().orElse(0.0);
+    }
 
+    // Méthode pour obtenir le nombre d'utilisateurs actifs aujourd'hui
+    public long getActiveUsersToday() {
+        return sessionRepository.countActiveUsersToday();
+    }
 }

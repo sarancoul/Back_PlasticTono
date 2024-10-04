@@ -152,7 +152,7 @@ public class SessionController {
         return ResponseEntity.ok(p2.getPoints());
     }
     /////////////////historique ///////////////////////////////////////////////////////////////////////////////////////////////
-    @GetMapping("/historique/{id}")
+   /* @GetMapping("/historique/{id}")
     public ResponseEntity<List<HistoriqueDepotDTO>> getHistoriqueDepot(@PathVariable String id) {
         final var result=utilisateursService.fetchUtilisateursByFirebaseUUID(id);
         if(result.isPresent()){
@@ -187,6 +187,58 @@ public class SessionController {
         }else{
             return ResponseEntity.of(Optional.of(List.of()));
         }
+    }*/
+
+    @GetMapping("/historique/{id}")
+    public ResponseEntity<List<HistoriqueDepotDTO>> getHistoriqueDepot(@PathVariable String id) {
+        final var result = utilisateursService.fetchUtilisateursByFirebaseUUID(id);
+        if (result.isPresent()) {
+            List<Session> sessions = sessionRepository.findByUtilisateur_IdUtilisateur(result.get().getIdUtilisateur());
+
+            if (sessions.isEmpty()) {
+                // Ajoute une log pour voir si la session est vide
+                System.out.println("Aucune session trouvée pour l'utilisateur avec l'ID: " + id);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Collections.emptyList());
+            }
+
+            List<HistoriqueDepotDTO> historiqueDepotList = new ArrayList<>();
+
+            for (Session session : sessions) {
+                Kiosque kiosque = session.getKiosque();
+                Points points = pointsRepository.findFirstBySession(session);
+
+                HistoriqueDepotDTO historiqueDepotDTO = new HistoriqueDepotDTO();
+                historiqueDepotDTO.setDateDepot(session.getDatedebut());
+
+                if (kiosque != null) {
+                    historiqueDepotDTO.setCodeKiosque(kiosque.getCode());
+                } else {
+                    historiqueDepotDTO.setCodeKiosque("Inconnu");
+                }
+
+                historiqueDepotDTO.setPoids(session.getPoids());
+                historiqueDepotDTO.setPoints(points != null ? points.getPoints() : 0);
+
+                historiqueDepotList.add(historiqueDepotDTO);
+            }
+
+            return ResponseEntity.ok(historiqueDepotList);
+        } else {
+            System.out.println("Utilisateur avec l'ID Firebase " + id + " non trouvé.");
+            return ResponseEntity.of(Optional.of(List.of()));
+        }
+    }
+
+    @GetMapping("/totalpoids")
+    public ResponseEntity<Double> getTotalWeightToday() {
+        double totalWeight = sessionService.getTotalWeightToday();
+        return ResponseEntity.ok(totalWeight);
+    }
+
+    @GetMapping("/active-users-today")
+    public ResponseEntity<Long> getActiveUsersToday() {
+        long activeUsers = sessionService.getActiveUsersToday();
+        return ResponseEntity.ok(activeUsers);
     }
 
 }

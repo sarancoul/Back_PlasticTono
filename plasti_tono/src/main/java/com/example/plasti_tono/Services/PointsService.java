@@ -2,25 +2,32 @@ package com.example.plasti_tono.Services;
 
 import com.example.plasti_tono.Model.Points;
 import com.example.plasti_tono.Model.Session;
+import com.example.plasti_tono.Model.TransactionHistorique;
 import com.example.plasti_tono.Model.Utilisateurs;
 import com.example.plasti_tono.Repository.PointsRepository;
 import com.example.plasti_tono.Repository.SessionRepository;
+import com.example.plasti_tono.Repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PointsService {
     private  final PointsRepository pointsRepository;
     private SessionRepository sessionRepository;
-
+    private final TransactionRepository transactionRepository;
     private final double conversionRate = 10.0;
 
     @Autowired
-    public PointsService(PointsRepository pointsRepository, SessionRepository sessionRepository) {
+    public PointsService(PointsRepository pointsRepository, SessionRepository sessionRepository, TransactionRepository transactionRepository) {
         this.pointsRepository = pointsRepository;
         this.sessionRepository=sessionRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public Points EnregistrePoint(Session session, double poids){
@@ -30,6 +37,8 @@ public class PointsService {
         nouveauPoints.setPoids(poids);
         nouveauPoints.setPoints(points);
         nouveauPoints.setSession(session);
+        Utilisateurs utilisateur = session.getUtilisateur();
+        nouveauPoints.setUtilisateur(utilisateur);
 
         return pointsRepository.save(nouveauPoints);
     }
@@ -47,6 +56,35 @@ public class PointsService {
 
     public Double convertirPointsEnArgent(Double points) {
         return points * conversionRate;
+    }
+
+    public void enregistrerHistoriqueTransaction(Utilisateurs utilisateurs, Double points, Double argent) {
+
+        TransactionHistorique transaction = new TransactionHistorique();
+        transaction.setUserId(utilisateurs.getFirebaseUid());
+        transaction.setPointsConvertis(points);
+        transaction.setMontant(argent);
+        transaction.setDate(new Date());
+        transaction.setType(transaction.getType());
+        transaction.setStatut(transaction.getStatut());
+        transaction.setDescription(points + " points convertis en argent (" + argent + " FCFA)");
+        transactionRepository.save(transaction);
+
+    }
+
+    public List<TransactionHistorique> recupererHistoriqueParUtilisateur(String firebaseUUID) {
+        return transactionRepository.findByUserId(firebaseUUID);
+    }
+
+    public Optional<Double> getPointsThisMonth() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime today = LocalDateTime.now();
+
+        return pointsRepository.sumPointsThisMonth(startOfMonth, today);
+    }
+
+    public Double getPointsByUserId(Long userId) {
+        return pointsRepository.findPointsByUtilisateurId(userId);
     }
 
 

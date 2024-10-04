@@ -3,6 +3,7 @@ package com.example.plasti_tono.Controller;
 import com.example.plasti_tono.Model.PointTotal;
 import com.example.plasti_tono.Model.Points;
 import com.example.plasti_tono.Model.Session;
+import com.example.plasti_tono.Model.TransactionHistorique;
 import com.example.plasti_tono.Repository.PointsRepository;
 import com.example.plasti_tono.Repository.SessionRepository;
 import com.example.plasti_tono.Services.PointTotalService;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Indexed;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/points")
@@ -23,15 +26,13 @@ public class PointsController {
     @Autowired
     private UtilisateursService utilisateursService;
     private SessionRepository sessionRepository;
-    private PointsRepository pointsRepository;
     private PointsService pointsService;
 
     private PointTotalService pointTotalService;
 
-    public PointsController(UtilisateursService utilisateursService, SessionRepository sessionRepository, PointsRepository pointsRepository, PointsService pointsService,PointTotalService pointTotalService) {
+    public PointsController(UtilisateursService utilisateursService, SessionRepository sessionRepository, PointsService pointsService,PointTotalService pointTotalService) {
         this.utilisateursService = utilisateursService;
         this.sessionRepository = sessionRepository;
-        this.pointsRepository = pointsRepository;
         this.pointsService = pointsService;
         this.pointTotalService=pointTotalService;
     }
@@ -100,6 +101,63 @@ public class PointsController {
         System.out.println(request.getPoints());
 
         pointTotalService.saveOrUpdatePoint(utilisateur.get(),-request.getPoints());
+        pointsService.enregistrerHistoriqueTransaction(utilisateur.get(), request.getPoints(), argent);
+        return ResponseEntity.ok(argent);
+    }
+
+   /* @PostMapping("/convert")
+    public ResponseEntity<?> convertirPointsEnArgent(
+            @RequestBody Points request,
+            @RequestParam(name = "userId") String firebaseUid) {
+
+        final var utilisateur = utilisateursService.fetchUtilisateursByFirebaseUUID(firebaseUid);
+
+        if (!utilisateur.get().getNumTel().equals(request.getPhoneNumber())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Numéro de téléphone invalide");
+        }
+
+        Double argent = pointsService.convertirPointsEnArgent(request.getPoints());
+
+        pointTotalService.saveOrUpdatePoint(utilisateur.get(), -request.getPoints());
+        pointsService.enregistrerHistoriqueTransaction(utilisateur.get(), request.getPoints(), argent);
+
+        return ResponseEntity.ok(argent);
+    }*/
+
+
+
+    @GetMapping("/user/{firebaseUUID}")
+    public ResponseEntity<List<TransactionHistorique>> getTransactionsByUserId(@PathVariable String firebaseUUID) {
+        List<TransactionHistorique> transactions = pointsService.recupererHistoriqueParUtilisateur(firebaseUUID);
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/this-month")
+    public ResponseEntity<Double> getPointsThisMonth() {
+        Optional<Double> points = pointsService.getPointsThisMonth();
+        if (points.isPresent()) {
+            return ResponseEntity.ok(points.get());
+        } else {
+            return ResponseEntity.noContent().build(); // Pas de points pour ce mois
+        }
+    }
+    
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         /*Session session = sessionRepository.findById(request.getSession().getIdSession())
                .orElseThrow(() -> new RuntimeException("Session non trouvée"));
@@ -115,8 +173,3 @@ public class PointsController {
             // Sauvegarder les nouveaux points
             pointsRepository.save(points);
         }*/
-
-        return ResponseEntity.ok(argent);
-    }
-
-}

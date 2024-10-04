@@ -25,9 +25,9 @@ public class Alarme {
 
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne
+   /* @ManyToOne
     @JoinColumn(name = "idKiosque")
-    private Kiosque kiosque;
+    private Kiosque kiosque;*/
 
     @ManyToMany(mappedBy = "alarme")
     private Set<Admin> admins;

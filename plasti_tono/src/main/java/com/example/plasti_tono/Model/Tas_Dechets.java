@@ -25,8 +25,8 @@ public class Tas_Dechets {
     @JoinColumn(name = "idUtilisateurs")
     private Utilisateurs utilisateur;
 
-    @ManyToOne
+   /* @ManyToOne
     @JoinColumn(name = "idKiosque")
-    private Kiosque kiosque;
+    private Kiosque kiosque;*/
 
 }

@@ -13,7 +13,7 @@ public class Kiosque {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idKiosque;
 
-    private String Localisation;
+    private String localisation;
 
     private int niveau_remplissage;
 
@@ -21,12 +21,12 @@ public class Kiosque {
 
     private String code;
 
-    @JsonIgnore
+    /*@JsonIgnore
     @OneToMany(mappedBy = "kiosque")
-    private Set<Tas_Dechets> tasDechets;
-    @JsonIgnore
+    private Set<Tas_Dechets> tasDechets;*/
+    /*@JsonIgnore
     @OneToMany(mappedBy = "kiosque")
-    private Set<Alarme> alarme;
+    private Set<Alarme> alarme;*/
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "idAdmin")
